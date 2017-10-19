@@ -11,6 +11,10 @@ response = requests.get(rss_url)
 
 soup = BeautifulSoup(response.content, features="xml")
 items = soup.find("item")
-print(items.title.text)
-print(items.description.text)
-print(items.pubDate.text)
+
+titleSplit = items.title.text.split()
+temp = titleSplit[-2]
+time = titleSplit[2]
+date = items.pubDate.text.split()[0:4]
+
+print(" ".join(date), time, temp)
