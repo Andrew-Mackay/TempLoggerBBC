@@ -1,3 +1,7 @@
 # TempLoggerBBC
-Python script to log temperatures at a location from BBC weather
-Currently under development
+Script written in Python 3 that logs weather data from http://www.bbc.co.uk/weather/.
+The script writes the data to a file called "weatherData.txt".
+The format of the output is as followed:
+day,month,year,location,title_time,title_temp(°C),time,temp(°C),direction,wind_speed(mph),humidity(%),pressure(mb)
+To specify the locations you want to log, open up BBCTempLogger.py in a text editor and change the locations array.
+A cron file is also included to run this script every day at 12:00.
