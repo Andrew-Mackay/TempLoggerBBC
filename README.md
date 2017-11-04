@@ -10,7 +10,7 @@ Install python3-lxml by running:
     sudo apt-get install python3-lxml -y
     
 Install requirements by running:
-    pip3 install -r requiremnts.txt
+    pip3 install -r requirements.txt
     
 Add crontab by running:
     crontab templogger.cron
