@@ -1,1 +1,1 @@
-00 12 * * * python3 BBCTempLogger.py
+00 12 * * * /usr/bin/python3 ~/TempLoggerBBC/BBCTempLogger.py
