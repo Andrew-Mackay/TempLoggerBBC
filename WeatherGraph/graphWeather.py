@@ -18,6 +18,8 @@ DIRECTION_CONVERSION = {"Northerly":0, "North-North-Easterly":22.5, "North-Easte
 glasgow = weather[np.where(weather[:,3] == "Glasgow")]
 edinburgh = weather[np.where(weather[:,3] == "Edinburgh")]
 
+locations = [glasgow, edinburgh]
+
 # get date values
 dates = weather[np.where(weather[:,3] == "Glasgow")][:,0:3]
 # swap days and years
@@ -30,12 +32,11 @@ x_date = [datetime.datetime(*x).date() for x in dates]
 
 
 def plotTemperature():
-    glasgow_t = glasgow[:,5]
-    edinburgh_t = edinburgh[:,5]
     fig = plt.figure()
     ax = fig.add_subplot(1,1,1)
-    ax.plot(x_date, glasgow_t, label="Glasgow")
-    ax.plot(x_date, edinburgh_t, label="Edinburgh")
+    for location in locations:
+        ax.plot(x_date, location[:,5], label=location[0,3])
+
     ax.set_xlabel("Date")
     ax.set_ylabel("Temperature (°C)")
     ax.legend()
@@ -44,29 +45,43 @@ def plotTemperature():
     plt.show()
 
 
-def convertDirection(direction):
-    return DIRECTION_CONVERSION[direction]
-
-
-def plotWindSpeed(location):
-    location_speed = location[:,9]
-    location_direction = location[:,8]
-
-    fig = plt.figure()
-    ax = fig.add_subplot(1,1,1, projection='polar')
-    ax.scatter(np.radians(direction), speed, s=15)
-    ax.set_title("Polar plot of wind speed in Las Vegas, 2000-2017")
+def plotPolarWindSpeed(location):
+    city = location[0,3]
+    location_s = location[:,9].tolist()
+    location_d = location[:,8].tolist()
+    # convert direction to radians
+    for i in range(len(location_d)):
+        location_d[i] = np.deg2rad(DIRECTION_CONVERSION[location_d[i]])
+    ax = plt.subplot(111, projection='polar')
+    ax.scatter(location_d, location_s)
+    ax.set_theta_direction(-1)
+    ax.set_theta_zero_location("N")
+    ax.set_title("Polar plot of wind speed in " + city)
     ax.set_xlabel("Direction (degrees)")
     ax.set_ylabel("Speed (mph)")
+    ax.grid(True)
+    plt.show()
+
+
+def plotWindSpeed():
+    fig = plt.figure()
+    ax = fig.add_subplot(1,1,1)
+    for location in locations:
+        ax.plot(x_date, location[:,9], label=location[0,3])
+
+    ax.set_xlabel("Date")
+    ax.set_ylabel("Wind Speed (mph)")
+    ax.legend()
+    ax.grid(True)
+    ax.legend()
+    plt.show()
 
 
 def plotHumidity():
-    glasgow_h = glasgow[:,10]
-    edinburgh_h = edinburgh[:,10]
     fig = plt.figure()
     ax = fig.add_subplot(1,1,1)
-    ax.plot(x_date, glasgow_h, label="Glasgow")
-    ax.plot(x_date, edinburgh_h, label="Edinburgh")
+    for location in locations:
+        ax.plot(x_date, location[:,10], label=location[0,3])
     ax.set_xlabel("Date")
     ax.set_ylabel("Humidity (%)")
     ax.legend()
@@ -76,12 +91,10 @@ def plotHumidity():
 
 
 def plotPressure():
-    glasgow_p = glasgow[:,11]
-    edinburgh_p = edinburgh[:,11]
     fig = plt.figure()
     ax = fig.add_subplot(1,1,1)
-    ax.plot(x_date, glasgow_p, label="Glasgow")
-    ax.plot(x_date, edinburgh_p, label="Edinburgh")
+    for location in locations:
+        ax.plot(x_date, location[:,11], label=location[0,3])
     ax.set_xlabel("Date")
     ax.set_ylabel("Pressure (mb)")
     ax.legend()
@@ -89,6 +102,36 @@ def plotPressure():
     ax.legend()
     plt.show()
 
-plotTemperature()
-plotHumidity()
-plotPressure()
+
+def showOptions():
+    print("Options: ")
+    print("\t 1: Temperature")
+    print("\t 2: Wind Speed")
+    print("\t 3: Humidity")
+    print("\t 4: Pressure")
+    print("\t 5: Polar Plot of Wind Speed")
+    print("\t o: display options")
+    print("\t q: quit")
+
+showOptions()
+option = ""
+while option != 'q':
+    option = input("Select option: ")
+    if option == '1':
+        plotTemperature()
+
+    elif option == '2':
+        plotWindSpeed()
+
+    elif option == '3':
+        plotHumidity()
+
+    elif option == '4':
+        plotPressure()
+
+    elif option == '5':
+        for location in locations:
+            plotPolarWindSpeed(location)
+
+    elif option == 'o':
+        showOptions()
