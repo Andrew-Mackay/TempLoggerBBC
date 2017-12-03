@@ -6,7 +6,16 @@ import pandas as pd
 import datetime
 
 
-weather = pd.read_csv("weatherData.txt", header=None)
+try:
+    print("Attempting to update weatherData.txt from server...")
+    os.system("scp -i ~/.ssh/temp-logger pi@tempLogger:weatherData.txt .")
+    print("Update successful!")
+
+except:
+    print("New weather data could not be fetched from server.")
+
+
+weather = pd.read_csv("weatherData.txt", header=None, na_values=["null"])
 weather = np.array(weather.values)
 
 DIRECTION_CONVERSION = {"Northerly":0, "North-North-Easterly":22.5, "North-Easterly":45,
@@ -32,13 +41,14 @@ x_date = [datetime.datetime(*x).date() for x in dates]
 
 
 def plotTemperature():
-    fig = plt.figure()
+    fig = plt.figure("Temperature")
     ax = fig.add_subplot(1,1,1)
     for location in locations:
-        ax.plot(x_date, location[:,5], label=location[0,3])
+        ax.plot(x_date, list(location[:,5]), label=location[0,3])
 
     ax.set_xlabel("Date")
     ax.set_ylabel("Temperature (°C)")
+    ax.set_title("Temperature")
     ax.legend()
     ax.grid(True)
     ax.legend()
@@ -51,8 +61,13 @@ def plotPolarWindSpeed(location):
     location_d = location[:,8].tolist()
     # convert direction to radians
     for i in range(len(location_d)):
-        location_d[i] = np.deg2rad(DIRECTION_CONVERSION[location_d[i]])
-    ax = plt.subplot(111, projection='polar')
+        try:
+            location_d[i] = np.deg2rad(DIRECTION_CONVERSION[location_d[i]])
+        except:
+            location_d[i] = 0 # case when wind speed = 0 (no direction)
+
+    fig = plt.figure("Polar Wind Speed")
+    ax = fig.add_subplot(1,1,1, projection='polar')
     ax.scatter(location_d, location_s)
     ax.set_theta_direction(-1)
     ax.set_theta_zero_location("N")
@@ -64,13 +79,14 @@ def plotPolarWindSpeed(location):
 
 
 def plotWindSpeed():
-    fig = plt.figure()
+    fig = plt.figure("Wind Speed")
     ax = fig.add_subplot(1,1,1)
     for location in locations:
         ax.plot(x_date, location[:,9], label=location[0,3])
 
     ax.set_xlabel("Date")
     ax.set_ylabel("Wind Speed (mph)")
+    ax.set_title("Wind Speed")
     ax.legend()
     ax.grid(True)
     ax.legend()
@@ -78,12 +94,13 @@ def plotWindSpeed():
 
 
 def plotHumidity():
-    fig = plt.figure()
+    fig = plt.figure("Humidity")
     ax = fig.add_subplot(1,1,1)
     for location in locations:
         ax.plot(x_date, location[:,10], label=location[0,3])
     ax.set_xlabel("Date")
     ax.set_ylabel("Humidity (%)")
+    ax.set_title("Humidity")
     ax.legend()
     ax.grid(True)
     ax.legend()
@@ -91,12 +108,13 @@ def plotHumidity():
 
 
 def plotPressure():
-    fig = plt.figure()
+    fig = plt.figure("Pressure")
     ax = fig.add_subplot(1,1,1)
     for location in locations:
         ax.plot(x_date, location[:,11], label=location[0,3])
     ax.set_xlabel("Date")
     ax.set_ylabel("Pressure (mb)")
+    ax.set_title("Pressure")
     ax.legend()
     ax.grid(True)
     ax.legend()
@@ -104,14 +122,17 @@ def plotPressure():
 
 
 def showOptions():
+    print("----------------------------------------------")
     print("Options: ")
     print("\t 1: Temperature")
     print("\t 2: Wind Speed")
     print("\t 3: Humidity")
     print("\t 4: Pressure")
     print("\t 5: Polar Plot of Wind Speed")
-    print("\t o: display options")
-    print("\t q: quit")
+    print("\t a: Show All")
+    print("\t o: Display Options")
+    print("\t q: Quit \n")
+
 
 showOptions()
 option = ""
@@ -135,3 +156,11 @@ while option != 'q':
 
     elif option == 'o':
         showOptions()
+
+    elif option == 'a':
+        plotTemperature()
+        plotWindSpeed()
+        plotHumidity()
+        plotPressure()
+        for location in locations:
+            plotPolarWindSpeed(location)
